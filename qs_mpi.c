@@ -270,12 +270,12 @@ int main ( int argc, char *argv[] )
   MPI_Comm_size(curr_comm, &world_size);
 
   int num_local_ints = (int) num_ints/world_size;
-  if (world_rank == 0) {
-    num_local_ints += num_ints % world_size;
+  if (world_rank < num_ints % world_size) {
+    num_local_ints += 1;
   }
 
-  int data_buffer_size = 2*num_local_ints * sizeof(uint32_t);
-  int local_buffer_size = 2*num_local_ints * sizeof(uint32_t);
+  int data_buffer_size = (3*num_local_ints * sizeof(uint32_t))/2;
+  int local_buffer_size = (3*num_local_ints * sizeof(uint32_t))/2;
   int proc_0_buffer_size = 2*sizeof(uint32_t) * world_size;
 
   uint32_t *local_buffer = (uint32_t *) malloc(local_buffer_size);
@@ -560,7 +560,7 @@ int main ( int argc, char *argv[] )
       print_numbers(output_filename, local_nums, num_local_ints, world_rank, num_ints);
     }
     MPI_Barrier(MPI_COMM_WORLD);
-  } 
+  }
 
 
   free(local_buffer);
