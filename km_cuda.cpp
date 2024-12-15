@@ -157,15 +157,14 @@ int iter = 0;
 
 
 int _grid_size_n = 9;
-int _grid_size[_grid_size_n] = {4096, 2048, 1024, 512, 256, 128, 64, 32};
+int _grid_size[_grid_size_n] = {16384, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32};
 int _block_size_n = 3;
 int _block_size[_block_size_n] = {1024, 512, 256};
 double cur_best_time = std::numeric_limits<double>::max();
 int cur_best[] = {0, 0};
 
-
-for (int g_idx = 0; g_idx < _grid_size_n; g_idx++){
-  for (int b_idx = 0; b_idx < _block_size_n; b_idx++){
+for (int b_idx = 0; b_idx < _block_size_n; b_idx++){
+  for (int g_idx = 0; g_idx < _grid_size_n; g_idx++){
     int g = _grid_size[0];
     int b = _block_size[b_idx];
 
