@@ -165,7 +165,7 @@ int cur_best[] = {0, 0};
 
 for (int b_idx = 0; b_idx < _block_size_n; b_idx++){
   for (int g_idx = 0; g_idx < _grid_size_n; g_idx++){
-    int g = _grid_size[0];
+    int g = _grid_size[g_idx];
     int b = _block_size[b_idx];
 
     km_main(g, b, points, classes, clusters, cluster_indexes, new_cluster_indexes,
