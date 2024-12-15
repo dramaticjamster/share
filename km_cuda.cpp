@@ -156,10 +156,10 @@ int iter = 0;
 //         num_pts, num_cl, dim, MAX_ITER);
 
 
-int _grid_size_n = 8;
-int _grid_size[_grid_size_n] = {1024, 512, 256, 128, 64, 32, 16, 8};
-int _block_size_n = 8;
-int _block_size[_block_size_n] = {1024, 512, 256, 128, 64, 32, 16, 8};
+int _grid_size_n = 9;
+int _grid_size[_grid_size_n] = {4096, 2048, 1024, 512, 256, 128, 64, 32, 16};
+int _block_size_n = 6;
+int _block_size[_block_size_n] = {2048, 1024, 512, 256, 128, 64};
 double cur_best_time = std::numeric_limits<double>::max();
 int cur_best[] = {0, 0};
 
