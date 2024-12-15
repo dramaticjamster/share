@@ -152,36 +152,36 @@ int iter = 0;
   INSIDE THE PARALLEL REGION
 */
 
-// km_main(grid_size, block_size, points, classes, clusters, cluster_indexes, new_cluster_indexes,
-//         num_pts, num_cl, dim, MAX_ITER);
-
-
-int _grid_size_n = 9;
-int _grid_size[_grid_size_n] = {16384, 8192, 4096, 2048, 1024, 512, 256, 128, 64};
-int _block_size_n = 3;
-int _block_size[_block_size_n] = {1024, 512, 256};
-double cur_best_time = std::numeric_limits<double>::max();
-int cur_best[] = {-1, -1};
-
-for (int b_idx = 0; b_idx < _block_size_n; b_idx++){
-  for (int g_idx = 0; g_idx < _grid_size_n; g_idx++){
-    //int g = _grid_size[g_idx];
-    //int b = _block_size[b_idx];
-    int g = 8192;
-    int b = 1024;
-
-    km_main(g, b, points, classes, clusters, cluster_indexes, new_cluster_indexes,
+km_main(grid_size, block_size, points, classes, clusters, cluster_indexes, new_cluster_indexes,
         num_pts, num_cl, dim, MAX_ITER, time_ptr);
 
-    printf("\n  Current run (g, b: %d, %d), time elapsed = %.04f\n", g, b, *time_ptr);
-    if (*time_ptr < cur_best_time){
-      cur_best_time = *time_ptr;
-      cur_best[0] = g;
-      cur_best[1] = b;
-    }
-    printf("    Current best: (%d, %d) at %.04f sec\n", cur_best[0], cur_best[1], cur_best_time);
-  }
-}
+
+// int _grid_size_n = 9;
+// int _grid_size[_grid_size_n] = {16384, 8192, 4096, 2048, 1024, 512, 256, 128, 64};
+// int _block_size_n = 3;
+// int _block_size[_block_size_n] = {1024, 512, 256};
+// double cur_best_time = std::numeric_limits<double>::max();
+// int cur_best[] = {-1, -1};
+
+// for (int b_idx = 0; b_idx < _block_size_n; b_idx++){
+//   for (int g_idx = 0; g_idx < _grid_size_n; g_idx++){
+//     //int g = _grid_size[g_idx];
+//     //int b = _block_size[b_idx];
+//     int g = 8192;
+//     int b = 1024;
+
+//     km_main(g, b, points, classes, clusters, cluster_indexes, new_cluster_indexes,
+//         num_pts, num_cl, dim, MAX_ITER, time_ptr);
+
+//     printf("\n  Current run (g, b: %d, %d), time elapsed = %.04f\n", g, b, *time_ptr);
+//     if (*time_ptr < cur_best_time){
+//       cur_best_time = *time_ptr;
+//       cur_best[0] = g;
+//       cur_best[1] = b;
+//     }
+//     printf("    Current best: (%d, %d) at %.04f sec\n", cur_best[0], cur_best[1], cur_best_time);
+//   }
+// }
 /*
   Terminate.
 */
