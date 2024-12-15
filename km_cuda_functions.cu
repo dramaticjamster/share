@@ -794,6 +794,8 @@ void km_main(int grid_size, int block_size,
 
   double start_time, end_time;
 
+  block_size = min(1024, grid_size);
+
 
   cudaDeviceProp prop;
   cudaGetDeviceProperties(&prop, 0); // 0 is the default device
