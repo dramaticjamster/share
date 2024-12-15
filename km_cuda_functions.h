@@ -35,7 +35,7 @@ void _print_array(int *a, int n);
 
 void km_main(int grid_size, int block_size,
              float *points, int *classes, float *clusters, int *cluster_indexes, int *new_cluster_indexes,
-             int num_pts, int num_cl, int dim, int max_iter);
+             int num_pts, int num_cl, int dim, int max_iter, double* time_ptr);
 
 
 

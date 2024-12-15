@@ -425,24 +425,22 @@ __global__ void avg_dist_to_self_cluster(float *points, float* avg_dist, int* cl
   
   // calculate batch size (points held by block at a time) to maximize shared mem use
   int batchsize = suggested_batchsize;
+
   if (suggested_batchsize <= 0){
-  int batchsize = (sharedmem_per_block - 2*num_cls*sizeof(int) - dim*sizeof(float))
-                  / ((dim+2)*sizeof(float) + sizeof(int));
+    batchsize = (sharedmem_per_block - 2*num_cls*sizeof(int) - dim*sizeof(float)) / 
+                ((dim+2)*sizeof(float) + sizeof(int));
   }
-  // int batchsize = 9;
 
-  int const_idx = threadIdx.x+blockDim.x*blockIdx.x; // create typical 1D thread index from built-in variables
-  int idx = threadIdx.x;
-  int block_offset = blockIdx.x*batchsize;
-  int points_idx;
+  // int num = sharedmem_per_block - 2*num_cls*sizeof(int) - dim*sizeof(float);
+  // int denom = (dim+2)*sizeof(float) + sizeof(int);
 
-  
+  // int occupied_mem = 2*num_cls*sizeof(int) + dim*sizeof(float) +
+  //                    batchsize*(dim*sizeof(float) + 2*sizeof(float) + sizeof(int));
+  // if (threadIdx.x+blockIdx.x == 0){
+  //   printf("Calculated batchsize = %d / %d\n   = %d\n  would occupy %d/%d bytes\n", num, denom, batchsize, occupied_mem, sharedmem_per_block);
+  // }
 
-  // float* avg_dist = clusters;
-
-  // int batchsize = (sharedmem_per_block - );
-  // // while ...
-  // // printf("\nBlock %d, thread %d active, block_offset = %d\n", blockIdx.x, threadIdx.x, block_offset);
+  // batchsize = 9;
 
   // Define shared memory
   extern __shared__ char s[];
@@ -454,9 +452,15 @@ __global__ void avg_dist_to_self_cluster(float *points, float* avg_dist, int* cl
   float* cur_pt = (float*)&cls_to_idx_ncls[2*num_cls];
 
 
+  int const_idx = threadIdx.x+blockDim.x*blockIdx.x; // create typical 1D thread index from built-in variables
+  int idx = threadIdx.x;
+  int block_offset = blockIdx.x*batchsize;
+  int points_idx;
 
+  // int batchsize = (sharedmem_per_block - );
+  // // while ...
+  // // printf("\nBlock %d, thread %d active, block_offset = %d\n", blockIdx.x, threadIdx.x, block_offset);
 
-  // while (block_offset < num_pts){
   while (block_offset < num_pts){
     int num_pts_in_batch = min(batchsize, num_pts - block_offset);
     // if (blockIdx.x == 0 && threadIdx.x == 0){
@@ -784,7 +788,7 @@ __global__ void select_new_clusters(float *points, float* avg_dist, int* cluster
 
 void km_main(int grid_size, int block_size,
              float *points, int *classes, float *clusters, int *cluster_indexes, int *new_cluster_indexes,
-             int num_pts, int num_cl, int dim, int max_iter){
+             int num_pts, int num_cl, int dim, int max_iter, double* time_ptr){
   float *d_points, *d_clusters, *d_avg_dist;
   int *d_classes, *d_cluster_indexes, *d_new_cluster_indexes;
 
@@ -851,7 +855,7 @@ void km_main(int grid_size, int block_size,
   converge = false;
   cudaMalloc(&d_converge_ptr, sizeof(bool));
 
-  printf("Starting parallel region...\n");
+  // printf("Starting parallel region...\n");
   start_time = monotonic_seconds();
   end_time = start_time;
   // Parallel region
@@ -906,21 +910,23 @@ void km_main(int grid_size, int block_size,
     cudaMemcpy(&converge, d_converge_ptr, sizeof(bool), cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
 
-    printf("  [Iter %d/%d]: Total iter %d time: %0.04f\n", iter, max_iter, iter, monotonic_seconds()-end_time);
-    end_time = monotonic_seconds();
-    printf("  [Iter %d/%d]: converge = %d\n", iter, max_iter, converge);
-    printf("  [Iter %d/%d]: stop? = %d\n", iter, max_iter, converge || (iter > max_iter));
+    // printf("  [Iter %d/%d]: Total iter %d time: %0.04f\n", iter, max_iter, iter, monotonic_seconds()-start_time);
+    // end_time = monotonic_seconds();
+    // printf("  [Iter %d/%d]: converge = %d\n", iter, max_iter, converge);
+    // printf("  [Iter %d/%d]: stop? = %d\n", iter, max_iter, converge || (iter > max_iter));
 
     // Stop and copy data if converged, print duration
     if (converge || (iter >= max_iter)){
       cudaDeviceSynchronize();
-      printf("\n\nCONVERGED, stopping and saving\n");
+      printf("\n\nSTOPPING at iter %d/%d, saving and exiting\n", iter, max_iter);
       end_time = monotonic_seconds();
-      print_time(end_time-start_time);
+      double duration = end_time-start_time;
+      print_time(duration);
 
       iter = max_iter+1;
       cudaMemcpy(classes, d_classes, num_pts * sizeof(int), cudaMemcpyDeviceToHost);
       cudaMemcpy(clusters, d_clusters, num_cl * dim * sizeof(float), cudaMemcpyDeviceToHost);
+      *time_ptr = duration;
     }
 
 

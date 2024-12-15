@@ -8,7 +8,7 @@
 
 #include "km_cuda_functions.h"
 
-#define MAX_ITER 20
+#define MAX_ITER 2
 
 inline int norm_xy_to_idx(int pt_idx, int dim_idx, int dim){
   return dim_idx + pt_idx*dim;
@@ -39,6 +39,7 @@ int main ( int argc, char *argv[] )
   int num_cl = strtod(argv[2], NULL);
   int grid_size = strtod(argv[3], NULL);
   int block_size = strtod(argv[4], NULL);
+
 
   // printf("Num clusters, threads = %d, %d\n", num_cl, num_thread);
 
@@ -81,13 +82,18 @@ int main ( int argc, char *argv[] )
   float *points = (float *)malloc(num_pts * dim * sizeof(float));
   int *classes = (int *)malloc(num_pts * sizeof(int));
   float *clusters = (float *)malloc(num_cl * dim * sizeof(float));
+  int *classes_copy = (int *)malloc(num_pts * sizeof(int));
+  float *clusters_copy = (float *)malloc(num_cl * dim * sizeof(float));
   int *cluster_indexes = (int *)malloc(num_cl*sizeof(int));
   int *new_cluster_indexes = (int *)malloc(num_cl*sizeof(int));
+  double *time_ptr = (double *)malloc(sizeof(double));
   // line = (char *)malloc(128*dim*sizeof(char));
 
   
 
   _initialize_vec(classes, 0);
+  _initialize_vec(classes_copy, 0);
+
 
   // Loop through remaining lines in the file.
   for (int i = 0; i < num_pts; i++) {
@@ -123,6 +129,7 @@ int main ( int argc, char *argv[] )
   for (int i = 0; i < num_cl; i++){
     for (int j = 0; j < dim; j++){
       clusters[norm_xy_to_idx(i, j, dim)] = points[norm_xy_to_idx(i, j, dim)];
+      clusters_copy[norm_xy_to_idx(i, j, dim)] = points[norm_xy_to_idx(i, j, dim)];
     }
   }
 
@@ -145,9 +152,35 @@ int iter = 0;
   INSIDE THE PARALLEL REGION
 */
 
-km_main(grid_size, block_size, points, classes, clusters, cluster_indexes, new_cluster_indexes,
-        num_pts, num_cl, dim, MAX_ITER);
+// km_main(grid_size, block_size, points, classes, clusters, cluster_indexes, new_cluster_indexes,
+//         num_pts, num_cl, dim, MAX_ITER);
 
+
+int _grid_size_n = 8;
+int _grid_size[_grid_size_n] = {1024, 512, 256, 128, 64, 32, 16, 8};
+int _block_size_n = 8;
+int _block_size[_block_size_n] = {1024, 512, 256, 128, 64, 32, 16, 8};
+double cur_best_time = std::numeric_limits<double>::max();
+int cur_best[] = {0, 0};
+
+
+for (int g_idx = 0; g_idx < _grid_size_n; g_idx++){
+  for (int b_idx = 0; b_idx < _block_size_n; b_idx++){
+    int g = _grid_size[0];
+    int b = _block_size[b_idx];
+
+    km_main(g, b, points, classes, clusters, cluster_indexes, new_cluster_indexes,
+        num_pts, num_cl, dim, MAX_ITER, time_ptr);
+
+    printf("\n  Current run (g, b: %d, %d), time elapsed = %.04f\n", g, b, *time_ptr);
+    if (*time_ptr < cur_best_time){
+      cur_best_time = *time_ptr;
+      cur_best[0] = g;
+      cur_best[1] = b;
+    }
+    printf("    Current best: (%d, %d) at %.04f sec\n", cur_best[0], cur_best[1], cur_best_time);
+  }
+}
 /*
   Terminate.
 */
