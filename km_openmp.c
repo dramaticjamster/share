@@ -171,7 +171,7 @@ int main ( int argc, char *argv[] )
   }
 
   // Print the first line of the file
-  char line[1024];
+  char line[32*500];
   fgets(line, sizeof(line), file);
   // printf("First line of file: %s", line);
 
@@ -413,7 +413,7 @@ omp_set_num_threads(num_thread);
   for (int i = 0; i < num_cl; i++) {
     float* curr = clusters + i*dim;
     for (int j = 0; j < dim; j++) {
-      fprintf(medoids_file, "%f", curr[i]);
+      fprintf(medoids_file, "%f", curr[j]);
       if (j < dim-1) {
         fprintf(medoids_file, " ");
       } else {

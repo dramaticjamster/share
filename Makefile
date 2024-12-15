@@ -1,14 +1,20 @@
-all: qs_mpi
+all: km_cuda
 
-km_pthreads: km_pthreads.c
-	gcc km_pthreads.c -o km_pthreads -lm
+km_cuda: km_cuda.cpp
+	nvcc -c km_cuda.cpp
+	nvcc -c km_cuda_functions.cu
+	nvcc -o km_cuda km_cuda.o km_cuda_functions.o
 
-km_openmp: km_openmp.c
-	g++ km_openmp.c -o km_openmp -fopenmp
+debug: km_cuda.cpp
+	nvcc -g -c km_cuda.cpp
+	nvcc -g -c km_cuda_functions.cu
+	nvcc -o km_cuda km_cuda.o km_cuda_functions.o
 
-qs_mpi: qs_mpi.c
-	mpicc qs_mpi.c -o qs_mpi -fopenmp
+run_debug:
+	cuda-gdb -ex "set auto-insert-breakpoints all" --args km_cuda clusters0.txt 3 4 4
+
+clean_output:
+	rm output.txt
 
 clean:
-	rm km_openmp km_pthreads clusters.txt medoids.txt qs_mpi
-	
+	rm output.txt km_cuda km_cuda.o km_cuda_functions.o
