@@ -794,7 +794,7 @@ void km_main(int grid_size, int block_size,
 
   double start_time, end_time;
 
-  block_size = min(1024, grid_size);
+  block_size = min(1024, block_size);
 
 
   cudaDeviceProp prop;
