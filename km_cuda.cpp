@@ -8,7 +8,7 @@
 
 #include "km_cuda_functions.h"
 
-#define MAX_ITER 2
+#define MAX_ITER 20
 
 inline int norm_xy_to_idx(int pt_idx, int dim_idx, int dim){
   return dim_idx + pt_idx*dim;
