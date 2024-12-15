@@ -918,10 +918,11 @@ void km_main(int grid_size, int block_size,
     // Stop and copy data if converged, print duration
     if (converge || (iter >= max_iter)){
       cudaDeviceSynchronize();
-      printf("\n\nSTOPPING at iter %d/%d, saving and exiting\n", iter, max_iter);
       end_time = monotonic_seconds();
       double duration = end_time-start_time;
-      print_time(duration);
+      printf("\n\nSTOPPING at iter %d/%d, saving and exiting, time elapsed %.04f sec\n",
+       iter, max_iter, duration);
+      // print_time(duration);
 
       iter = max_iter+1;
       cudaMemcpy(classes, d_classes, num_pts * sizeof(int), cudaMemcpyDeviceToHost);
